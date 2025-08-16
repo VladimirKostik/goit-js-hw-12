@@ -1,0 +1,129 @@
+/**
+  |============================
+  | include css partials with
+  | default @import url()
+  |============================
+*/
+/* Common styles */
+@import url('./reset.css');
+@import url('./base.css');
+@i
+
+/* базове */
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  margin: 0;
+  padding: 1rem;
+  background: #fafafa;
+  color: #222;
+}
+
+/* форма */
+.form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  /* по вертикалі */
+  justify-content: center;
+  /* по горизонталі */
+  margin-bottom: 16px;
+}
+
+/* лоадер (контейнер) */
+.js-loader {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+/* loader-hidden - приховуємо/показуємо */
+.loader-hidden {
+  display: none !important;
+}
+
+/* галерея */
+.gallery {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* картка */
+.gallery__item img {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+/* інфа під карткою */
+.info {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+/* Лоадер (анімоване коло) */
+.loader {
+  display: block;
+  margin: 20px auto;
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ccc;
+  /* Сірий круг */
+  border-top-color: #007bff;
+  /* Синя верхня частина */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+
+.is-hidden {
+  display: none !important;
+}
+
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-btn {
+  border-radius: 8px;
+    padding: 8px 16px;
+    width: 80px;
+    height: 40px;
+    background: #4e75ff;
+}
+
+.search-btn:hover {
+    background: #6c8cff;
+}
+
+input {
+  width: 272px;
+    height: 40px;
+    border-radius: 8px;
+    border-color: #808080;
+}
+
+input:hover {
+border-color: #000000;
+}
+
+input:active {
+  border-color: #4E75FF;
+}
+.loading {
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 150%;
+  letter-spacing: 0.04em;
+  color: #2e2f42;
+}
