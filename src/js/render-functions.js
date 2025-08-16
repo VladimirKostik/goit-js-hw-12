@@ -1,11 +1,12 @@
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
+const galleryEl = document.querySelector('.gallery');
+const loaderEl = document.querySelector('.loader');
+const loadMoreEl = document.querySelector('.load-more');
 let lightbox;
-let loaderEl;
 
-export function createGallery(images = []) {
-  const gallery = document.querySelector('.gallery');
+export function createGallery(images = [], append = false) {
   const markup = images
     .map(
       ({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
@@ -23,7 +24,11 @@ export function createGallery(images = []) {
     )
     .join('');
 
-  gallery.insertAdjacentHTML('beforeend', markup);
+  if (append) {
+    galleryEl.insertAdjacentHTML('beforeend', markup);
+  } else {
+    galleryEl.innerHTML = markup;
+  }
 
   if (!lightbox) {
     lightbox = new SimpleLightbox('.gallery a', {
@@ -36,26 +41,21 @@ export function createGallery(images = []) {
 }
 
 export function clearGallery() {
-  const gallery = document.querySelector('.gallery'); 
-  if (gallery) gallery.innerHTML = '';
-}
-
-function ensureLoader() {
-  if (!loaderEl) {
-    loaderEl = document.createElement('div');
-    loaderEl.classList.add('loader', 'is-hidden');
-    loaderEl.innerHTML = `<span class="loader__spinner"></span>`;
-    document.querySelector('form').insertAdjacentElement('afterend', loaderEl);
-  }
+  galleryEl.innerHTML = '';
 }
 
 export function showLoader() {
-  ensureLoader();
   loaderEl.classList.remove('is-hidden');
 }
 
 export function hideLoader() {
-  if (loaderEl) {
-    loaderEl.classList.add('is-hidden');
-  }
+  loaderEl.classList.add('is-hidden');
+}
+
+export function showLoadMoreButton() {
+  loadMoreEl.classList.remove('is-hidden');
+}
+
+export function hideLoadMoreButton() {
+  loadMoreEl.classList.add('is-hidden');
 }

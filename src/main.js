@@ -1,20 +1,33 @@
+// main.js
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
-import { getImagesByQuery } from './js/pixabay-api.js';
-import { createGallery, clearGallery, showLoader, hideLoader } from './js/render-functions.js';
-import 'loaders.css/loaders.min.css';
+import { getImagesByQuery, perPage } from './js/pixabay-api.js';
+import {
+  createGallery,
+  clearGallery,
+  showLoader,
+  hideLoader,
+  showLoadMoreButton,
+  hideLoadMoreButton,
+} from './js/render-functions.js';
+// опційно: імпорт твого спінера, якщо використовуєш бібліотеку
+// import 'loaders.css/loaders.min.css';
 
 const form = document.querySelector('form');
-const submitBtn = form.querySelector('button[type="submit"]');
-const oldText = submitBtn.textContent;
+const loadMoreBtn = document.querySelector('.load-more');
+const galleryEl = document.querySelector('.gallery');
 
-form.addEventListener('submit', (e) => {
+let query = '';
+let currentPage = 1;
+let totalPages = 0;
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const formData = new FormData(e.target);
-  const message = formData.get('searchText').trim();
+  const formData = new FormData(e.currentTarget);
+  query = (formData.get('searchText') || '').trim();
 
-  if (!message) {
+  if (!query) {
     iziToast.error({
       position: 'topRight',
       title: 'Error',
@@ -23,41 +36,82 @@ form.addEventListener('submit', (e) => {
     return;
   }
 
+  currentPage = 1;
   clearGallery();
+  hideLoadMoreButton();
   showLoader();
 
-  // Ставимо стан "Loading..."
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Loading...';
-  submitBtn.classList.add('loading');
+  try {
+    const { hits, totalHits } = await getImagesByQuery(query, currentPage);
 
-  // Показуємо "Loading..." рівно 2 секунди
-  setTimeout(() => {
-    getImagesByQuery(message)
-      .then(images => {
-        if (!images.length) {
-          iziToast.error({
-            position: 'topRight',
-            title: 'Немає результатів',
-            message: 'Нічого не знайдено',
-          });
-          return;
-        }
-        createGallery(images);
-      })
-      .catch(err => {
-        iziToast.error({
-          position: 'topRight',
-          title: 'Помилка',
-          message: err.message || err,
-        });
-      })
-      .finally(() => {
-        hideLoader();
-        submitBtn.disabled = false;
-        submitBtn.textContent = oldText;
-        submitBtn.classList.remove('loading');
-        e.target.reset();
+    if (!hits.length) {
+      iziToast.error({
+        position: 'topRight',
+        title: 'Немає результатів',
+        message: 'Нічого не знайдено',
       });
-  }, 500);
+      return;
+    }
+
+    createGallery(hits, false);
+
+    totalPages = Math.ceil(totalHits / perPage);
+
+    if (currentPage < totalPages) {
+      showLoadMoreButton();
+    } else {
+      hideLoadMoreButton();
+      iziToast.info({
+        title: 'Info',
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
+    }
+  } catch (err) {
+    iziToast.error({
+      position: 'topRight',
+      title: 'Помилка',
+      message: err.message || err,
+    });
+  } finally {
+    hideLoader();
+  }
+});
+
+loadMoreBtn.addEventListener('click', async () => {
+  currentPage += 1;
+
+  try {
+    showLoader();
+
+    const { hits } = await getImagesByQuery(query, currentPage);
+    createGallery(hits, true);
+
+    // Плавний скрол на 2 висоти першої картки галереї
+    if (galleryEl.firstElementChild) {
+      const card = galleryEl.firstElementChild;
+      const { height } = card.getBoundingClientRect();
+      window.scrollBy({
+        top: height * 2,
+        behavior: 'smooth',
+      });
+    }
+
+    if (currentPage >= totalPages) {
+      hideLoadMoreButton();
+      iziToast.info({
+        title: 'Info',
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
+    }
+  } catch (err) {
+    iziToast.error({
+      title: 'Помилка',
+      message: err.message || err,
+      position: 'topRight',
+    });
+  } finally {
+    hideLoader();
+  }
 });
